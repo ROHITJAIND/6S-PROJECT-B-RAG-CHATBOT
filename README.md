@@ -33,7 +33,7 @@ The objective is to build a backend that ingests any PDF, indexes it for semanti
 ## 📂 Project Structure
 
 ```
-rag-pdf-chatbot/
+6S-PROJECT-A-RAG-CHATBOT/
 ├── main.py             # FastAPI backend server
 ├── rag_pipeline.py     # Core RAG logic (PDF processing, vector store, QA chain)
 ├── frontend.py         # Streamlit frontend application
