@@ -12,7 +12,7 @@ api_key = os.getenv("GOOGLE_API_KEY")
 if not api_key:
     raise ValueError("GOOGLE_API_KEY not found in .env file")
 
-def process_pdf_and_create_vector_store(pdf_path: str):
+def process_pdf(pdf_path: str):
     loader = PyPDFLoader(pdf_path)
     pages = loader.load_and_split()
 
@@ -32,6 +32,8 @@ def create_conversational_chain():
     Answer the question as detailed as possible from the provided context. 
     Make sure to provide all the details. If the answer is not in the provided context,
     just say, "The answer is not available in the context." Don't provide a wrong answer.
+    If it ask to do any mathmeatical calculation like calculate the count the total subjects,
+    or calaculate the gpa please provide correct answers.
 
     Context:
     {context}

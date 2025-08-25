@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 # Import your RAG functions
-from rag_pipeline import process_pdf_and_create_vector_store, get_answer_from_query
+from rag_pipeline import process_pdf, get_answer_from_query
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -54,7 +54,7 @@ async def upload_pdf(file: UploadFile = File(...)):
         
         # Process the PDF and create the vector store
         # In a real app, this should be an async background task
-        process_pdf_and_create_vector_store(file_path)
+        process_pdf(file_path)
 
     except Exception as e:
         raise HTTPException(
