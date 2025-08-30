@@ -11,11 +11,11 @@ st.set_page_config(
     initial_sidebar_state="auto",
 )
 
-st.title("🤖 Chat with your PDF")
+st.title("🤖 Chat with your PDF 📄")
 st.markdown("---")
 
 if "messages" not in st.session_state:
-    st.session_state.messages = []
+    st.session_state.messages = [{"role": "assistant", "content": "Hello! Upload a PDF and I'll help you find answers within it."}]
 if "file_uploaded" not in st.session_state:
     st.session_state.file_uploaded = False
 
@@ -34,7 +34,7 @@ with st.sidebar:
                     if response.status_code == 201:
                         st.success("PDF processed successfully!")
                         st.session_state.file_uploaded = True
-                        st.session_state.messages = []
+                        st.session_state.messages = [{"role": "assistant", "content": "PDF processed! You can now ask questions."}]
                     else:
                         st.error(f"Error processing PDF: {response.text}")
                 except requests.exceptions.RequestException as e:
@@ -87,3 +87,4 @@ if prompt := st.chat_input("Ask a question about your document..."):
                     message_placeholder.markdown(full_response)
             
             st.session_state.messages.append({"role": "assistant", "content": full_response})
+

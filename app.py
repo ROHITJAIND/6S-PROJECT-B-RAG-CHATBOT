@@ -6,6 +6,12 @@ import os
 import time
 from dotenv import load_dotenv
 
+import fitz  # PyMuPDF
+import easyocr
+from PIL import Image
+import numpy as np
+from langchain_core.documents import Document
+
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
@@ -17,28 +23,48 @@ load_dotenv()
 api_key = os.getenv("GOOGLE_API_KEY")
 
 def process_pdf_and_create_vector_store(pdf_files, api_key):
-    temp_dir = "temp_pdf_uploads"
-    os.makedirs(temp_dir, exist_ok=True)
-    
     all_docs = []
-    for pdf_file in pdf_files:
-        file_path = os.path.join(temp_dir, pdf_file.name)
-        with open(file_path, "wb") as f:
-            f.write(pdf_file.getbuffer())
-        
-        loader = PyPDFLoader(file_path)
-        pages = loader.load_and_split()
-        all_docs.extend(pages)
+    
+    reader = easyocr.Reader(['en'])
 
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=10000, chunk_overlap=1000)
-    docs = text_splitter.split_documents(all_docs)
+    for pdf_file in pdf_files:
+        pdf_bytes = pdf_file.read()
+        pdf_document = fitz.open(stream=pdf_bytes, filetype="pdf")
+        
+        for page_num in range(len(pdf_document)):
+            page = pdf_document.load_page(page_num)
+            text = page.get_text()
+            
+            
+            if len(text.strip()) < 100: 
+                try:
+                    pix = page.get_pixmap()
+                    img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+                    
+                    ocr_results = reader.readtext(np.array(img))
+                    
+                    text = " ".join([result[1] for result in ocr_results])
+                except Exception as e:
+                    st.warning(f"Could not perform OCR on page {page_num + 1} of {pdf_file.name}. Skipping. Error: {e}")
+                    text = "" 
+            
+            if text:
+                all_docs.append(Document(
+                    page_content=text,
+                    metadata={"source": pdf_file.name, "page": page_num + 1}
+                ))
+
+    if not all_docs:
+        st.error("Could not extract any text from the uploaded PDF(s). Please check the file(s).")
+        return None
+
+    
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    docs_chunks = text_splitter.split_documents(all_docs)
 
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001", google_api_key=api_key)
-    vector_store = FAISS.from_documents(docs, embeddings)
     
-    for file_name in os.listdir(temp_dir):
-        os.remove(os.path.join(temp_dir, file_name))
-    os.rmdir(temp_dir)
+    vector_store = FAISS.from_documents(docs_chunks, embeddings)
     
     return vector_store
 
