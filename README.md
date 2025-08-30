@@ -4,6 +4,10 @@ This project is a complete Retrieval-Augmented Generation (RAG) system that allo
 
 The application is built with a **FastAPI** backend for the AI logic and a **Streamlit** frontend for a user-friendly chat interface.
 
+#### Live Testing:
+
+https://ragpdfbot.streamlit.app
+
 ## 🎯 Problem Statement
 
 The objective is to build a backend that ingests any PDF, indexes it for semantic search, and answers queries via a RAG pipeline. This provides a powerful tool for quickly extracting information from dense documents without manual reading.

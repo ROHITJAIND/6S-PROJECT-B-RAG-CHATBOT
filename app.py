@@ -92,7 +92,7 @@ def create_conversational_chain(api_key):
     return chain
 
 st.set_page_config(page_title="Chat with your PDF 📄", page_icon="🤖")
-st.title("🤖 Chat with your PDF")
+st.title("🤖 Chat with your PDF 📄")
 st.markdown("---")
 
 if "messages" not in st.session_state:
